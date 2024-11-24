@@ -1,0 +1,33 @@
+services:
+  fastapi:
+    build:
+      context: ./fastapi667      # Указываем путь к FastAPI проекту
+      dockerfile: Dockerfile  # Dockerfile для FastAPI в папке backend
+    ports:
+      - "8000:8000"  # Проброс порта для FastAPI
+    volumes:
+      - ./fastapi667:/app  # Монтируем директорию с бэкендом
+    environment:
+      - DATABASE_URL=sqlite:///app/todo.db
+      # - DATABASE_URL=sqlite:///./todo.db  # Указываем путь к базе данных SQLite
+    networks:
+      - app-network
+
+  vue:
+    build:
+      context: ./project_todo    # Указываем путь к Vue.js проекту
+      dockerfile: Dockerfile # Dockerfile для Vue.js в папке frontend
+    ports:
+      - "8080:8080"  # Проброс порта для Vue.js
+    volumes:
+      - ./project_todo:/app  # Монтируем директорию с фронтендом
+    environment:
+      - VUE_APP_API_URL=http://fastapi:8000  # Указываем путь к API для Vue.js (адрес FastAPI)
+    depends_on:
+      - fastapi  # Убедимся, что FastAPI запускается перед Vue.js
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
